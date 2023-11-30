@@ -56,7 +56,8 @@ public class NamingGrpcRedoService implements ConnectionEventListener {
     private long redoDelayTime;
     
     private final ConcurrentMap<String, InstanceRedoData> registeredInstances = new ConcurrentHashMap<>();
-    
+
+    //维护redo的数据
     private final ConcurrentMap<String, SubscriberRedoData> subscribes = new ConcurrentHashMap<>();
     
     private final ScheduledExecutorService redoExecutor;
@@ -111,6 +112,7 @@ public class NamingGrpcRedoService implements ConnectionEventListener {
      * @param instance    registered instance
      */
     public void cacheInstanceForRedo(String serviceName, String groupName, Instance instance) {
+        // 返回groupName + "@@" + serviceName;
         String key = NamingUtils.getGroupedName(serviceName, groupName);
         InstanceRedoData redoData = InstanceRedoData.build(serviceName, groupName, instance);
         synchronized (registeredInstances) {
@@ -143,6 +145,7 @@ public class NamingGrpcRedoService implements ConnectionEventListener {
         String key = NamingUtils.getGroupedName(serviceName, groupName);
         synchronized (registeredInstances) {
             InstanceRedoData redoData = registeredInstances.get(key);
+            //redoData还在，表示注册成功。
             if (null != redoData) {
                 redoData.registered();
             }

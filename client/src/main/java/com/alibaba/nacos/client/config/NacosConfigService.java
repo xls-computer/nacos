@@ -46,7 +46,7 @@ import java.util.Properties;
 
 /**
  * Config Impl.
- *
+ *  客户端配置服务
  * @author Nacos
  */
 @SuppressWarnings("PMD.ServiceOrDaoClassShouldEndWithImplRule")
@@ -159,6 +159,7 @@ public class NacosConfigService implements ConfigService {
     
     private String getConfigInner(String tenant, String dataId, String group, long timeoutMs) throws NacosException {
         group = blank2defaultGroup(group);
+        //参数检查
         ParamUtils.checkKeyParam(dataId, group);
         ConfigResponse cr = new ConfigResponse();
         
@@ -185,6 +186,7 @@ public class NacosConfigService implements ConfigService {
         }
         
         try {
+            //获取配置文件
             ConfigResponse response = worker.getServerConfig(dataId, group, tenant, timeoutMs, false);
             cr.setContent(response.getContent());
             cr.setEncryptedDataKey(response.getEncryptedDataKey());
@@ -228,7 +230,8 @@ public class NacosConfigService implements ConfigService {
             String betaIps, String content, String type, String casMd5) throws NacosException {
         group = blank2defaultGroup(group);
         ParamUtils.checkParam(dataId, group, content);
-        
+
+        //封装配置信息
         ConfigRequest cr = new ConfigRequest();
         cr.setDataId(dataId);
         cr.setTenant(tenant);
@@ -238,7 +241,8 @@ public class NacosConfigService implements ConfigService {
         configFilterChainManager.doFilter(cr, null);
         content = cr.getContent();
         String encryptedDataKey = cr.getEncryptedDataKey();
-        
+
+        //发布配置信息
         return worker
                 .publishConfig(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type);
     }

@@ -49,7 +49,7 @@ import java.util.UUID;
 
 /**
  * Nacos Naming Service.
- *
+ * 命名服务类（注册/发现）
  * @author nkorange
  */
 @SuppressWarnings("PMD.ServiceOrDaoClassShouldEndWithImplRule")
@@ -484,6 +484,7 @@ public class NacosNamingService implements NamingService {
     private void checkAndStripGroupNamePrefix(Instance instance, String groupName) throws NacosException {
         String serviceName = instance.getServiceName();
         if (serviceName != null) {
+            //检查是否合法
             String groupNameOfInstance = NamingUtils.getGroupName(serviceName);
             if (!groupName.equals(groupNameOfInstance)) {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, String.format(

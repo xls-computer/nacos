@@ -74,6 +74,7 @@ public abstract class AbstractClient implements Client {
             InstancePublishInfo old = publishers.put(service, instancePublishInfo);
             MetricsMonitor.incrementIpCountWithBatchRegister(old, (BatchInstancePublishInfo) instancePublishInfo);
         } else {
+            //如果是新的实例，则更新MetricsMonitor下的ipCount
             if (null == publishers.put(service, instancePublishInfo)) {
                 MetricsMonitor.incrementInstanceCount();
             }
@@ -182,12 +183,14 @@ public abstract class AbstractClient implements Client {
     public void release() {
         Collection<InstancePublishInfo> instancePublishInfos = publishers.values();
         for (InstancePublishInfo instancePublishInfo : instancePublishInfos) {
+            //减少实例ip的数量
             if (instancePublishInfo instanceof BatchInstancePublishInfo) {
                 MetricsMonitor.decrementIpCountWithBatchRegister(instancePublishInfo);
             } else {
                 MetricsMonitor.getIpCountMonitor().decrementAndGet();
             }
         }
+        //减少订阅的数量
         MetricsMonitor.getSubscriberCount().addAndGet(-1 * subscribers.size());
     }
     

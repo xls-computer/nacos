@@ -28,9 +28,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @Configuration
 @Order(99)
 public class AddressServerSecurityConfiguration extends WebSecurityConfigurerAdapter {
-    
+
+    //springsecurity的配置类
+    // https://blog.csdn.net/qq_31960623/article/details/120829127
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        //放行/nacos/v1/as/**
         http.authorizeHttpRequests(requestMatcherRegistry -> requestMatcherRegistry.mvcMatchers("/nacos/v1/as/**").authenticated())
                 .csrf().disable().httpBasic();
     }

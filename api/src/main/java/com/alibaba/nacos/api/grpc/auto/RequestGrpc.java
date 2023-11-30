@@ -203,6 +203,8 @@ public final class RequestGrpc {
     public com.google.common.util.concurrent.ListenableFuture<com.alibaba.nacos.api.grpc.auto.Payload> request(
         com.alibaba.nacos.api.grpc.auto.Payload request) {
       return futureUnaryCall(
+          //getChannel()为ManagedChannelOrphanWrapper: ManagedChannel 的包装类，用于引用 ManagedChannel，是channel类的实现
+          //newCall方法实现了远程的调用
           getChannel().newCall(getRequestMethod(), getCallOptions()), request);
     }
   }

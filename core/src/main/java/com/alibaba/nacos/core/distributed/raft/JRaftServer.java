@@ -330,9 +330,13 @@ public class JRaftServer {
         
         final Node node = tuple.node;
         if (node.isLeader()) {
+            //nacos支持AP和CP方案
+            //raft是一个CP方案的实现
+            //主节点【所有的修改都要经过主节点，主节点接收到变化后，会通过log同步到follow节点】
             // The leader node directly applies this request
             applyOperation(node, data, closure);
         } else {
+            //从节点
             // Forward to Leader for request processing
             invokeToLeader(group, data, rpcRequestTimeoutMs, closure);
         }
@@ -396,6 +400,7 @@ public class JRaftServer {
     
     public void applyOperation(Node node, Message data, FailoverClosure closure) {
         final Task task = new Task();
+        //NacosClosure的第二个参数Closure是一个接口，是在做完这些任务之后调用的
         task.setDone(new NacosClosure(data, status -> {
             NacosClosure.NacosStatus nacosStatus = (NacosClosure.NacosStatus) status;
             closure.setThrowable(nacosStatus.getThrowable());
@@ -407,12 +412,15 @@ public class JRaftServer {
         byte[] requestTypeFieldBytes = new byte[2];
         requestTypeFieldBytes[0] = ProtoMessageUtil.REQUEST_TYPE_FIELD_TAG;
         if (data instanceof ReadRequest) {
+            //读请求
             requestTypeFieldBytes[1] = ProtoMessageUtil.REQUEST_TYPE_READ;
         } else {
+            //写请求
             requestTypeFieldBytes[1] = ProtoMessageUtil.REQUEST_TYPE_WRITE;
         }
         
         byte[] dataBytes = data.toByteArray();
+        //开辟空间存放标识和数据
         task.setData((ByteBuffer) ByteBuffer.allocate(requestTypeFieldBytes.length + dataBytes.length)
                 .put(requestTypeFieldBytes).put(dataBytes).position(0));
         node.apply(task);

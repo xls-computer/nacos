@@ -60,25 +60,35 @@ public class ConsoleConfig {
         methodsCache.initClassMethod("com.alibaba.nacos.config.server.controller");
         methodsCache.initClassMethod("com.alibaba.nacos.console.controller");
     }
-    
+
+    //设置跨域资源共享（由于浏览器为了安全采用的同源策略【协议+域名+端口】，非同源是无法共享cookie、session、发送ajax请求，因为现在很多都是采用的前后端分离，不符合同源策略，所以要配置跨域共享）
+    //https://zhuanlan.zhihu.com/p/118381660
+    //做法：在跨域访问时，给返回的response加上Access-Control-Allow-Origin：告诉浏览器允许向服务端请求资源的域名
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
+        //凭证允许（跨域返回cookie）
         config.setAllowCredentials(true);
+        //content-type允许类型
         config.addAllowedHeader("*");
         config.setMaxAge(18000L);
+        //允许访问的方法
         config.addAllowedMethod("*");
+        //允许访问的源站
         config.addAllowedOriginPattern("*");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        //所有路径都进行过滤
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
-    
+
+    //方式XSS跨域脚本攻击
     @Bean
     public XssFilter xssFilter() {
         return new XssFilter();
     }
-    
+
+    //当使用JSON格式时，Spring Boot将使用ObjectMapper实例来序列化响应并反序列化请求。
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer jacksonObjectMapperCustomization() {
         return jacksonObjectMapperBuilder -> jacksonObjectMapperBuilder.timeZone(ZoneId.systemDefault().toString());

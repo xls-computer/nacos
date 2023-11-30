@@ -56,9 +56,11 @@ public class NamingClientProxyDelegate implements NamingClientProxy {
     private final ServiceInfoUpdateService serviceInfoUpdateService;
     
     private final ServiceInfoHolder serviceInfoHolder;
-    
+
+    //http代理
     private final NamingHttpClientProxy httpClientProxy;
-    
+
+    //grpc代理
     private final NamingGrpcClientProxy grpcClientProxy;
     
     private final SecurityProxy securityProxy;
@@ -194,6 +196,7 @@ public class NamingClientProxyDelegate implements NamingClientProxy {
     }
     
     private NamingClientProxy getExecuteClientProxy(Instance instance) {
+        //如果是短暂的实例则使用grpc代理，否则使用http代理
         return instance.isEphemeral() ? grpcClientProxy : httpClientProxy;
     }
     

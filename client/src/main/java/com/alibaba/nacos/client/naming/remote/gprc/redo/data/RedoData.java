@@ -20,7 +20,7 @@ import java.util.Objects;
 
 /**
  * Nacos naming redo data.
- *
+ * 用来判断是否注册成功
  * @author xiweng.yy
  */
 @SuppressWarnings("PMD.AbstractClassShouldStartWithAbstractNamingRule")

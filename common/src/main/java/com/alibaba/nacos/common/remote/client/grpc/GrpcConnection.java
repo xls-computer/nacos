@@ -69,19 +69,23 @@ public class GrpcConnection extends Connection {
     
     @Override
     public Response request(Request request, long timeouts) throws NacosException {
+        //封装为grpcRequest对象
         Payload grpcRequest = GrpcUtils.convert(request);
+        //发送grpc请求，返回一个Future对象（异步获取结果）
         ListenableFuture<Payload> requestFuture = grpcFutureServiceStub.request(grpcRequest);
         Payload grpcResponse;
         try {
             if (timeouts <= 0) {
+                //阻塞等待结果
                 grpcResponse = requestFuture.get();
             } else {
+                //在指定时间内等待结果，没有结果作为返回
                 grpcResponse = requestFuture.get(timeouts, TimeUnit.MILLISECONDS);
             }
         } catch (Exception e) {
             throw new NacosException(NacosException.SERVER_ERROR, e);
         }
-        
+        //解析返回结果
         return (Response) GrpcUtils.parse(grpcResponse);
     }
     

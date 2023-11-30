@@ -27,7 +27,7 @@ import com.alibaba.nacos.common.task.AbstractExecuteTask;
 
 /**
  * Redo task.
- *
+ * redo线程
  * @author xiweng.yy
  */
 public class RedoScheduledTask extends AbstractExecuteTask {

@@ -103,8 +103,11 @@ public class InstanceOperatorClientImpl implements InstanceOperator {
         NamingUtils.checkInstanceIsLegal(instance);
         
         boolean ephemeral = instance.isEphemeral();
+        //由于[ip + ":" + port + "#" + ephemeral]组成
         String clientId = IpPortBasedClient.getClientId(instance.toInetAddr(), ephemeral);
+        //clients中没有则创建并加入
         createIpPortClientIfAbsent(clientId);
+        //根据namespaceId, groupName, serviceName, ephemeral创建Service对象
         Service service = getService(namespaceId, serviceName, ephemeral);
         clientOperationService.registerInstance(service, instance, clientId);
     }

@@ -26,7 +26,7 @@ import com.alibaba.nacos.api.exception.NacosException;
 
 /**
  * Config service example.
- *
+ *  配置的上传和获取
  * @author Nacos
  */
 public class ConfigExample {
@@ -38,6 +38,7 @@ public class ConfigExample {
         Properties properties = new Properties();
         properties.put("serverAddr", serverAddr);
         ConfigService configService = NacosFactory.createConfigService(properties);
+        //首次获取配置信息，为null
         String content = configService.getConfig(dataId, group, 5000);
         System.out.println("[config content] " + content);
         configService.addListener(dataId, group, new Listener() {
@@ -52,17 +53,21 @@ public class ConfigExample {
             }
         });
 
+        //发布配置信息
         boolean isPublishOk = configService.publishConfig(dataId, group, "content");
         System.out.println("[publish result] " + isPublishOk);
 
         Thread.sleep(3000);
+        //获取配置信息
         content = configService.getConfig(dataId, group, 5000);
         System.out.println("[config content]: " + content);
 
+        //删除配置信息
         boolean isRemoveOk = configService.removeConfig(dataId, group);
         System.out.println("[delete result]: " + isRemoveOk);
         Thread.sleep(3000);
 
+        //再次获取配置信息
         content = configService.getConfig(dataId, group, 5000);
         System.out.println("[config content]: " + content);
         Thread.sleep(300000);

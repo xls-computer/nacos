@@ -74,6 +74,7 @@ public class NamingUtils {
         if (!serviceNameWithGroup.contains(Constants.SERVICE_INFO_SPLITER)) {
             return serviceNameWithGroup;
         }
+        //如果有"@@"，则"@@"后的一个为serviceName
         return serviceNameWithGroup.split(Constants.SERVICE_INFO_SPLITER)[1];
     }
     
@@ -84,6 +85,7 @@ public class NamingUtils {
         if (!serviceNameWithGroup.contains(Constants.SERVICE_INFO_SPLITER)) {
             return Constants.DEFAULT_GROUP;
         }
+        //如果有"@@"，则"@@"前的第一个为GroupName
         return serviceNameWithGroup.split(Constants.SERVICE_INFO_SPLITER)[0];
     }
     
@@ -138,6 +140,8 @@ public class NamingUtils {
      * @throws NacosException if check failed, throw exception
      */
     public static void checkInstanceIsLegal(Instance instance) throws NacosException {
+        //要求服务实例设置的心跳超时时间必须（默认15s） >= 实例设置的心跳间隔（默认5s）
+        //要求服务实例设置的下线时间必须（默认30s） >= 实例设置的心跳间隔（默认5s）
         if (instance.getInstanceHeartBeatTimeOut() < instance.getInstanceHeartBeatInterval()
                 || instance.getIpDeleteTimeout() < instance.getInstanceHeartBeatInterval()) {
             throw new NacosApiException(NacosException.INVALID_PARAM, ErrorCode.INSTANCE_ERROR,

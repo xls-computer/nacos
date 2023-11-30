@@ -66,12 +66,14 @@ public class LocalConfigInfoProcessor {
     }
     
     public static String getFailover(String serverName, String dataId, String group, String tenant) {
+        //按照serviceName、group、dataId组成的文件路径
         File localPath = getFailoverFile(serverName, dataId, group, tenant);
         if (!localPath.exists() || !localPath.isFile()) {
             return null;
         }
         
         try {
+            //存在该文件，则返回本地的文件
             return readFile(localPath);
         } catch (IOException ioe) {
             LOGGER.error("[" + serverName + "] get failover error, " + localPath, ioe);

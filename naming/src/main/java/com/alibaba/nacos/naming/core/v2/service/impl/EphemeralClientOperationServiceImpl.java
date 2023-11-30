@@ -54,6 +54,7 @@ public class EphemeralClientOperationServiceImpl implements ClientOperationServi
     
     @Override
     public void registerInstance(Service service, Instance instance, String clientId) throws NacosException {
+        //临时的实例
         NamingUtils.checkInstanceIsLegal(instance);
     
         Service singleton = ServiceManager.getInstance().getSingleton(service);
@@ -66,10 +67,13 @@ public class EphemeralClientOperationServiceImpl implements ClientOperationServi
         if (!clientIsLegal(client, clientId)) {
             return;
         }
+        //创建一个publishInfo
         InstancePublishInfo instanceInfo = getPublishInfo(instance);
         client.addServiceInstance(singleton, instanceInfo);
+        //更新lastUpdatedTime
         client.setLastUpdatedTime();
         client.recalculateRevision();
+        //发布事件
         NotifyCenter.publishEvent(new ClientOperationEvent.ClientRegisterServiceEvent(singleton, clientId));
         NotifyCenter
                 .publishEvent(new MetadataEvent.InstanceMetadataEvent(singleton, instanceInfo.getMetadataId(), false));

@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Nacos naming example.
  * <p>Add the JVM parameter to run the NamingExample:</p>
+ * 添加配置
  * {@code -DserverAddr=${nacos.server.ip}:${nacos.server.port} -Dnamespace=${namespaceId}}
  *
  * @author nkorange
@@ -49,11 +50,13 @@ public class NamingExample {
     public static void main(String[] args) throws NacosException, InterruptedException {
         
         Properties properties = new Properties();
+        //System.getProperty会获取运行程序时给的参数
         properties.setProperty("serverAddr", System.getProperty("serverAddr", "localhost"));
         properties.setProperty("namespace", System.getProperty("namespace", "public"));
         
         NamingService naming = NamingFactory.createNamingService(properties);
-        
+
+        //注册服务实例
         naming.registerInstance(INSTANCE_SERVICE_NAME, INSTANCE_IP, INSTANCE_PORT, INSTANCE_CLUSTER_NAME);
         
         System.out.println("[instances after register] " + naming.getAllInstances(INSTANCE_SERVICE_NAME));
@@ -64,7 +67,8 @@ public class NamingExample {
                     thread.setName("test-thread");
                     return thread;
                 });
-        
+
+        //服务订阅
         naming.subscribe(INSTANCE_SERVICE_NAME, new AbstractEventListener() {
             
             //EventListener onEvent is sync to handle, If process too low in onEvent, maybe block other onEvent callback.
@@ -80,7 +84,8 @@ public class NamingExample {
                 System.out.println("[instances from event] " + ((NamingEvent) event).getInstances());
             }
         });
-        
+
+        //取消注册服务实例
         naming.deregisterInstance(INSTANCE_SERVICE_NAME, INSTANCE_IP, INSTANCE_PORT, INSTANCE_CLUSTER_NAME);
         
         Thread.sleep(1000);

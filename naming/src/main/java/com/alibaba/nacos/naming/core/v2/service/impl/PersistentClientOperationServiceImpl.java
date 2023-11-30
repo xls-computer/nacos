@@ -102,12 +102,14 @@ public class PersistentClientOperationServiceImpl extends RequestProcessor4CP im
     
     @Override
     public void registerInstance(Service service, Instance instance, String clientId) {
+        //持久化的实例
         Service singleton = ServiceManager.getInstance().getSingleton(service);
         if (singleton.isEphemeral()) {
             throw new NacosRuntimeException(NacosException.INVALID_PARAM,
                     String.format("Current service %s is ephemeral service, can't register persistent instance.",
                             singleton.getGroupedServiceName()));
         }
+        //封装成一个持久化的实例请求对象
         final InstanceStoreRequest request = new InstanceStoreRequest();
         request.setService(service);
         request.setInstance(instance);
@@ -117,6 +119,7 @@ public class PersistentClientOperationServiceImpl extends RequestProcessor4CP im
                 .build();
         
         try {
+            //持久化（会进行集群的数据同步）
             protocol.write(writeRequest);
             Loggers.RAFT.info("Client registered. service={}, clientId={}, instance={}", service, clientId, instance);
         } catch (Exception e) {

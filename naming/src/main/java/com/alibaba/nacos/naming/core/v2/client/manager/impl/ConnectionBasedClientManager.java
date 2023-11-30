@@ -47,10 +47,12 @@ import java.util.concurrent.TimeUnit;
  */
 @Component("connectionBasedClientManager")
 public class ConnectionBasedClientManager extends ClientConnectionEventListener implements ClientManager {
-    
+
+    //clientId -> ConnectionBasedClient
     private final ConcurrentMap<String, ConnectionBasedClient> clients = new ConcurrentHashMap<>();
     
     public ConnectionBasedClientManager() {
+        //开启检查和清理实例任务【的定时任务，每隔5s执行一次】
         GlobalExecutor
                 .scheduleExpiredClientCleaner(new ExpiredClientCleaner(this), 0, Constants.DEFAULT_HEART_BEAT_INTERVAL,
                         TimeUnit.MILLISECONDS);
@@ -69,6 +71,7 @@ public class ConnectionBasedClientManager extends ClientConnectionEventListener 
     
     @Override
     public boolean clientConnected(String clientId, ClientAttributes attributes) {
+        //根据type获取工厂类，并创建该类型的client对象，放入到clients中
         String type = attributes.getClientAttribute(ClientConstants.CONNECTION_TYPE);
         ClientFactory clientFactory = ClientFactoryHolder.getInstance().findClientFactory(type);
         return clientConnected(clientFactory.newClient(clientId, attributes));
@@ -98,12 +101,15 @@ public class ConnectionBasedClientManager extends ClientConnectionEventListener 
     @Override
     public boolean clientDisconnected(String clientId) {
         Loggers.SRV_LOG.info("Client connection {} disconnect, remove instances and subscribers", clientId);
+        //清理连接
         ConnectionBasedClient client = clients.remove(clientId);
         if (null == client) {
             return true;
         }
+        //维护数据
         client.release();
         boolean isResponsible = isResponsibleClient(client);
+        //发布事件
         NotifyCenter.publishEvent(new ClientOperationEvent.ClientReleaseEvent(client, isResponsible));
         NotifyCenter.publishEvent(new ClientEvent.ClientDisconnectEvent(client, isResponsible));
         return true;
@@ -135,6 +141,7 @@ public class ConnectionBasedClientManager extends ClientConnectionEventListener 
         if (null != client) {
             // remote node of old version will always verify with zero revision
             if (0 == verifyData.getRevision() || client.getRevision() == verifyData.getRevision()) {
+                //接收到心跳，刷新lastRenewTime
                 client.setLastRenewTime();
                 return true;
             } else {
@@ -152,13 +159,15 @@ public class ConnectionBasedClientManager extends ClientConnectionEventListener 
         public ExpiredClientCleaner(ConnectionBasedClientManager clientManager) {
             this.clientManager = clientManager;
         }
-        
+
+        //进行过期线程清理（如果不存活或者长时间没有心跳，则任务已经过期）
         @Override
         public void run() {
             long currentTime = System.currentTimeMillis();
             for (String each : clientManager.allClientId()) {
                 ConnectionBasedClient client = (ConnectionBasedClient) clientManager.getClient(each);
                 if (null != client && client.isExpire(currentTime)) {
+                    //过期清理
                     clientManager.clientDisconnected(each);
                 }
             }
